@@ -1,12 +1,32 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const req = require("express/lib/request");
 
 app.use(cors());
 app.use(express.json());
+
+
+//======================= Varify JWT =====================
+const verifyJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).send({ message: 'UnAuthorized access' });
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+      if (err) {
+        return res.status(403).send({ message: 'Forbidden access' })
+      }
+      req.decoded = decoded;
+      next();
+    });
+  }
+
 
 // ======================makign db connection===============
 
@@ -29,6 +49,19 @@ const run = async () => {
     const productCollection = client.db("voltlab").collection("product");
     const userCollection = client.db("voltlab").collection("users");
     const reviewCollection = client.db("voltlab").collection("Reviews");
+
+    app.put('/user/:email', async(req,res)=>{
+        const email = req.params.email;
+        const user = req.body;
+        const filter = {email};
+        const option = {upsert: true};
+        const updateDoc = {
+            $set : user
+        };
+        const result = await userCollection.updateOne(filter,updateDoc,option);
+        const token =jwt.sign({email},process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1d'});
+        res.send({result,token});
+    })
   } finally {
   }
 };
@@ -40,5 +73,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Doctors App listening on port ${port}`);
+  console.log(`listening on port ${port}`);
 });
