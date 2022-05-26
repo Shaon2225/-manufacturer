@@ -82,9 +82,30 @@ const run = async () => {
     app.get('/userprofile/:email', async(req,res)=>{
       const email = req.params.email;
       const query = {email};
-      console.log(query);
       const result = await userCollection.findOne(query);
       res.send(result);
+    })
+
+    // ===================================get all users
+    app.get('/allusers',async(req,res)=>{
+      const query= {};
+      const result = await userCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    //================================== delete user
+    app.delete('/allusers/dlt/:email',verifyJWT,async(req,res)=>{
+      const email = req.params.email;
+      const query ={email};
+      const result = userCollection.deleteOne(query);
+      res.send(result);
+
+    //================================= make admin
+    app.post('/allusers/makeadmin/:email', verifyJWT , async(req,res)=>{
+      const email = req.params.email;
+      const query ={email};
+      const user = userCollection.findOne(query);
+    })
     })
   } finally {
   }
