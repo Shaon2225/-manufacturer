@@ -163,14 +163,19 @@ const run = async () => {
     
 
     //================================== get all orders by individual user
-    app.get('/allorders/:email',async(req,res)=>{
+    app.get('/allorders/:email',verifyJWT, async(req,res)=>{
       const email = req.params.email;
       const query = {email};
       const result = await orderCollection.find(query).toArray();
       res.send(result);
     })
     //================================== dlt order
-    app.delete('/orders/')
+    app.delete('/allorders/dlt/:id',verifyJWT,async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:ObjectId(id)};
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    })
   } finally {
   }
 };
