@@ -50,6 +50,7 @@ const run = async () => {
     const productCollection = client.db("voltlab").collection("product");
     const userCollection = client.db("voltlab").collection("users");
     const reviewCollection = client.db("voltlab").collection("Reviews");
+    const orderCollection = client.db("voltlab").collection("orders");
 
     app.put('/user/:email', async(req,res)=>{
         const email = req.params.email;
@@ -144,6 +145,32 @@ const run = async () => {
       const result = await productCollection.deleteOne(query);
       res.send(result);
     })
+
+    //=================================== get single product
+    app.get('/allproducts/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query={_id:ObjectId(id)};
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    })
+
+    //=================================== place order
+    app.post('/allproducts/palceorder',verifyJWT,async(req,res)=>{
+      const query = req.body;
+      const result = await orderCollection.insertOne(query);
+      res.send(result);
+    })
+    
+
+    //================================== get all orders by individual user
+    app.get('/allorders/:email',async(req,res)=>{
+      const email = req.params.email;
+      const query = {email};
+      const result = await orderCollection.find(query).toArray();
+      res.send(result);
+    })
+    //================================== dlt order
+    app.delete('/orders/')
   } finally {
   }
 };
