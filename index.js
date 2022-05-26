@@ -122,6 +122,13 @@ const run = async () => {
       const result = await adminCollection.findOne(query);
       res.send(result);
     })
+
+    //================================= add product
+    app.post('/addproduct', verifyJWT , async(req,res)=>{
+      const query = req.body;
+      const result = await productCollection.insertOne(query);
+      res.send(result);
+    })
   } finally {
   }
 };
