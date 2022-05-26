@@ -4,7 +4,7 @@ const app = express();
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const req = require("express/lib/request");
 const res = require("express/lib/response");
 
@@ -127,6 +127,21 @@ const run = async () => {
     app.post('/addproduct', verifyJWT , async(req,res)=>{
       const query = req.body;
       const result = await productCollection.insertOne(query);
+      res.send(result);
+    })
+
+    //================================== get all products
+    app.get('/allproducts', async(req,res)=>{
+      const query={};
+      const result = await productCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    //=================================== dlt product
+    app.delete('/allproducts/dlt/:id',verifyJWT,async(req,res)=>{
+      const id= req.params.id;
+      const query={_id:ObjectId(id)};
+      const result = await productCollection.deleteOne(query);
       res.send(result);
     })
   } finally {
