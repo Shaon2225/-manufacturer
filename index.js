@@ -99,13 +99,28 @@ const run = async () => {
       const query ={email};
       const result = userCollection.deleteOne(query);
       res.send(result);
+    })
 
     //================================= make admin
     app.post('/allusers/makeadmin/:email', verifyJWT , async(req,res)=>{
       const email = req.params.email;
-      const query ={email};
-      const user = userCollection.findOne(query);
+      const query=req.body;
+      const filter = {email};
+      const option = {upsert:true};
+      const updateDoc = {
+        $set: {...query,role:'admin'}
+      };
+      const result1 =await userCollection.updateOne(filter,updateDoc,option);
+      const result = await adminCollection.insertOne(query);
+      res.send(result);
     })
+
+    //================================= get admin
+    app.get('/admin/:email', verifyJWT, async (req,res)=>{
+      const email = req.params.email;
+      const query ={email};
+      const result = await adminCollection.findOne(query);
+      res.send(result);
     })
   } finally {
   }
