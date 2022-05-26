@@ -7,9 +7,14 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const req = require("express/lib/request");
 const res = require("express/lib/response");
+const strip = require('stripe')(process.env.STRIPE_API_KEY);
 
 app.use(cors());
 app.use(express.json());
+
+
+//======================= FOR STRIPE ====================
+
 
 
 //======================= Varify JWT =====================
@@ -169,6 +174,14 @@ const run = async () => {
       const result = await orderCollection.find(query).toArray();
       res.send(result);
     })
+
+    //================================== get order by id
+    app.get('/order/:id',verifyJWT,async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id:ObjectId(id)};
+      const result = await orderCollection.findOne(query);
+      res.send(result);
+    })
     //================================== dlt order
     app.delete('/allorders/dlt/:id',verifyJWT,async(req,res)=>{
       const id = req.params.id;
@@ -176,6 +189,35 @@ const run = async () => {
       const result = await orderCollection.deleteOne(query);
       res.send(result);
     })
+
+
+    //=============================== update after payment
+    app.put('/order/makepayment/:id',verifyJWT,async(req,res)=>{
+      const id= req.params.id;
+      const filter= {_id:ObjectId(id)};
+      const option = {upsert:true};
+      const updateDoc={
+        $set:{payment:'paid'}
+      }
+      const result = await orderCollection.updateOne(filter,updateDoc,option);
+      res.send(result);
+    })
+
+
+    //=============================== for payment
+    app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
+      const {price}=req.body;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: calculateOrderAmount(items),
+        currency: "usd",
+        payment_method_types: ['card'],
+
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      });
+    })
+
   } finally {
   }
 };
