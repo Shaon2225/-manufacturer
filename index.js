@@ -207,14 +207,12 @@ const run = async () => {
     app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
       const {price}=req.body;
       const paymentIntent = await Stripe.paymentIntents.create({
-        amount: calculateOrderAmount(items),
-        currency: "usd",
-        payment_method_types: ['card'],
+        amount: price,
+        currency: 'usd',
+        payment_method_types:['card']
 
       });
-      res.send({
-        clientSecret: paymentIntent.client_secret
-      });
+      res.send({clientSecret: paymentIntent.client_secret});
     })
 
   } finally {
