@@ -7,6 +7,7 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const req = require("express/lib/request");
 const res = require("express/lib/response");
+const { default: Stripe } = require("stripe");
 const strip = require('stripe')(process.env.STRIPE_API_KEY);
 
 app.use(cors());
@@ -207,7 +208,7 @@ const run = async () => {
     //=============================== for payment
     app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
       const {price}=req.body;
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await Stripe.paymentIntents.create({
         amount: calculateOrderAmount(items),
         currency: "usd",
         payment_method_types: ['card'],
@@ -224,9 +225,7 @@ const run = async () => {
 
 run().catch(console.dir);
 
-app.get("/", (req, res) => {
-  res.send("Hello From Doctor Uncle!");
-});
+
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`);
