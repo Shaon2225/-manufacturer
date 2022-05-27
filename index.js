@@ -5,8 +5,6 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const req = require("express/lib/request");
-const res = require("express/lib/response");
 const { default: Stripe } = require("stripe");
 const strip = require('stripe')(process.env.STRIPE_API_KEY);
 
