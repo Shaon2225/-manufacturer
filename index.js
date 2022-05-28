@@ -203,10 +203,29 @@ const run = async () => {
     })
 
 
+    //=============================== add product review
+    app.put('/addreview',verifyJWT,async(req,res)=>{
+      const query = req.body;
+      const result = await reviewCollection.insertOne(query);
+      res.send(result);
+    })
+
+
+    //=============================== get reviews
+    app.get('/product-review', async(req,res)=>{
+      const query = {};
+      const result = await reviewCollection.find(query).toArray();
+      const min = result.length-4;
+      const max = result.length-1;
+      const review = result.slice(min,max);
+      res.send(review);
+    })
+
+
     //=============================== for payment
     app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
       const {price}=req.body;
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await Stripe.paymentIntents.create({
         amount: price,
         currency: 'usd',
         payment_method_types:['card']
